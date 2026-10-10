@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 
-// 1. Register Chart.js components
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -89,7 +89,8 @@ function App() {
         }
 
         clearInterval(interval);
-        setResult(data.result);
+        result_payload = data.result;
+        setResult(result_payload);
         setLoading(false);
         setProgress(null);
 
@@ -101,24 +102,25 @@ function App() {
     }, 2000);
   };
 
-  // --- CHART HELPERS ---
-  
-  // Custom "Viridis" style palette for the Bar Chart
-  const viridisPalette = [
-    '#440154', '#482878', '#3E4A89', '#31688E', '#26828E',
-    '#1F9E89', '#35B779', '#6DCD59', '#B4DE2C', '#FDE725'
+  // --- RESTYLED CONFIGURATIONS FOR CHART.JS ---
+  const sophisticatedPalette = [
+    '#311042', '#431459', '#551A70', '#672088', '#7A29A0',
+    '#8D35B8', '#9F46C7', '#B05AD4', '#BE70E0', '#CC86EC'
   ];
 
   const getGenreChartData = (apiData) => {
     if (!apiData) return { labels: [], datasets: [] };
     return {
       labels: apiData.map(item => item.name),
-      datasets: [{
-        label: 'Total Visitors',
-        data: apiData.map(item => item.value),
-        backgroundColor: viridisPalette,
-        borderRadius: 4, 
-      }],
+      datasets: [
+        {
+          label: 'Total Visitors',
+          data: apiData.map(item => item.value),
+          backgroundColor: sophisticatedPalette,
+          borderRadius: { topRight: 6, bottomRight: 6, topLeft: 0, bottomLeft: 0 }, 
+          barThickness: 18,
+        }
+      ],
     };
   };
 
@@ -130,90 +132,108 @@ function App() {
         {
           label: 'Historical Actuals',
           data: apiData.map(item => item.history_value),
-          borderColor: '#000000', // Black line
-          backgroundColor: 'rgba(0, 0, 0, 0.1)',
-          borderWidth: 2,
-          tension: 0.2, pointRadius: 0, pointHoverRadius: 5,
+          borderColor: '#1E293B', 
+          backgroundColor: 'rgba(30, 41, 59, 0.02)',
+          fill: true,
+          borderWidth: 2.5,
+          tension: 0.4, 
+          cubicInterpolationMode: 'monotone', 
+          pointRadius: 0, 
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#1E293B',
         },
         {
           label: '42-Day Forecast',
           data: apiData.map(item => item.forecast_value),
-          borderColor: '#0000FF', // Blue line
-          backgroundColor: 'rgba(0, 0, 255, 0.1)',
-          borderWidth: 2,
-          borderDash: [5, 5], tension: 0.2, pointRadius: 0,
-        },
+          borderColor: '#4F46E5', 
+          backgroundColor: 'rgba(79, 70, 229, 0.02)',
+          fill: true,
+          borderWidth: 2.5,
+          borderDash: [5, 5], 
+          tension: 0.4, 
+          cubicInterpolationMode: 'monotone',
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#4F46E5',
+        }
       ],
     };
   };
 
-  // Helper to extract growth metric safely
   const getGrowthMetric = () => {
     if (result?.chart_data?.metrics?.growth_pct !== undefined) {
       const growth = result.chart_data.metrics.growth_pct;
-      const color = growth >= 0 ? 'green' : 'red';
+      const color = growth >= 0 ? '#10B981' : '#EF4444';
       return <span style={{ color, fontWeight: 'bold' }}>{growth > 0 ? '+' : ''}{growth}%</span>;
     }
     return "N/A";
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>RetailBoost POC Demo</h1>
+    <div style={{ padding: '40px 20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', maxWidth: '1200px', margin: '0 auto', backgroundColor: '#FAFAFA', color: '#1E293B' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.5px', marginBottom: '24px' }}>RetailBoost Forecast Demo</h1>
       <button 
         onClick={submitData} 
         disabled={loading}
-        style={{ padding: '10px 20px', fontSize: '16px', cursor: loading ? 'not-allowed' : 'pointer' }}
+        style={{ 
+          padding: '12px 24px', 
+          fontSize: '15px', 
+          fontWeight: '600',
+          borderRadius: '6px',
+          border: 'none',
+          backgroundColor: loading ? '#E2E8F0' : '#4F46E5',
+          color: '#FFFFFF',
+          boxShadow: loading ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          transition: 'background-color 0.2s'
+        }}
       >
         {loading ? 'Running Analysis...' : 'Ingest Data & Run Analysis'}
       </button>
 
       {/* --- Progress Bar & POC Description --- */}
       {loading && (
-        <div style={{ marginTop: '20px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px', background: '#f9f9f9' }}>
-          
-          {/* POC Description Text */}
-          <div style={{ marginBottom: '20px', fontSize: '14px', color: '#444', lineHeight: '1.6', textAlign: 'left', borderLeft: '4px solid #d32f2f', paddingLeft: '15px' }}>
-            <p style={{ fontWeight: 'bold', margin: '0 0 8px 0' }}>About this Analysis / 本分析について:</p>
+        <div style={{ marginTop: '24px', border: '1px solid #E2E8F0', padding: '24px', borderRadius: '12px', background: '#FFFFFF', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+          <div style={{ marginBottom: '20px', fontSize: '14px', color: '#475569', lineHeight: '1.6', textAlign: 'left', borderLeft: '4px solid #EF4444', paddingLeft: '16px' }}>
+            <p style={{ fontWeight: '700', margin: '0 0 6px 0', color: '#1E293B' }}>About this Analysis / 本分析について:</p>
             <p style={{ margin: '0 0 10px 0' }}>
               RetailBoost POC is a suite of AI tools being developed to predict demand and promote sales of artisan products in local "shotengai" family-run and mid-size shops in major Osaka Japan (e.g. Tenjinbashi-suji, Shinsaibashi, Amagasaki).
             </p>
-            <p style={{ margin: 0, fontStyle: 'italic', fontSize: '13px' }}>
+            <p style={{ margin: 0, fontStyle: 'italic', fontSize: '13px', color: '#64748B' }}>
               RetailBoost POCは、大阪の主要な商店街（天神橋筋、心斎橋、尼崎など）における家族経営や中規模店舗のために、需要予測、販売促進、プロモーション構築のための商品提案を行うAIツールスイートです。
             </p>
           </div>
 
-          <hr style={{ border: '0', borderTop: '1px solid #eee', margin: '20px 0' }} />
+          <hr style={{ border: '0', borderTop: '1px solid #F1F5F9', margin: '20px 0' }} />
 
-          <h3>Processing... {taskId && `(Task ID: ${taskId})`}</h3>
+          <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Processing... {taskId && `(Task ID: ${taskId})`}</h3>
           {progress ? (
             <div>
-              <p>{progress.message}</p>
-              <div style={{ width: '100%', backgroundColor: '#e0e0e0', height: '20px', borderRadius: '12px' }}>
-                <div style={{ width: `${progress.percent}%`, backgroundColor: '#4caf50', height: '100%', borderRadius: '14px', transition: 'width 0.5s ease-in-out' }}></div>
+              <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '8px' }}>{progress.message}</p>
+              <div style={{ width: '100%', backgroundColor: '#F1F5F9', height: '12px', borderRadius: '9999px', overflow: 'hidden' }}>
+                <div style={{ width: `${progress.percent}%`, backgroundColor: '#10B981', height: '100%', borderRadius: '9999px', transition: 'width 0.5s ease-in-out' }}></div>
               </div>
             </div>
-          ) : <p>Starting up...</p>}
+          ) : <p style={{ fontSize: '14px', color: '#64748B' }}>Starting up...</p>}
         </div>
       )}
 
       {/* Results */}
       {result && (
-        <div style={{ marginTop: '30px' }}>
-          <h2>Analysis Results</h2>
+        <div style={{ marginTop: '32px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '24px' }}>Analysis Results</h2>
 
           {/* 1. RENDER CHARTS IF DATA EXISTS */}
           {result.chart_data && (
             <div style={{ marginBottom: '40px' }}>
-              <h3 style={{ borderBottom: '2px solid #333', paddingBottom: '10px' }}>Visual Dashboard</h3>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '30px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '32px' }}>
                 
                 {/* --- Chart 1: Line Chart (Forecast) --- */}
-                <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                  <div style={{ marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px dashed #ccc' }}>
-                    <h4 style={{ margin: '0 0 10px 0', color: '#0000FF' }}>Future Demand Strategy</h4>
-                    <ul style={{ margin: 0, paddingLeft: '20px', color: '#555', fontSize: '14px' }}>
+                <div style={{ border: '1px solid #E2E8F0', padding: '24px', borderRadius: '12px', background: '#FFFFFF', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                  <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #F1F5F9' }}>
+                    <h4 style={{ margin: '0 0 8px 0', color: '#4F46E5', fontSize: '16px', fontWeight: '700' }}>Future Demand Strategy</h4>
+                    <ul style={{ margin: 0, paddingLeft: '20px', color: '#475569', fontSize: '14px', lineHeight: '1.5' }}>
                        <li>
                         <strong>Projection:</strong> Traffic trending {getGrowthMetric()} over next 6 weeks.
                        </li>
@@ -221,13 +241,19 @@ function App() {
                     </ul>
                   </div>
                   
-                  <div style={{ height: '350px', position: 'relative' }}>
+                  <div style={{ height: '320px', position: 'relative' }}>
                     <Line 
                       options={{
                         responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { position: 'top' }, title: { display: true, text: 'Demand Forecast (History vs Projection)' } },
+                        plugins: { 
+                          legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, font: { family: 'inherit', size: 12 } } }, 
+                          title: { display: true, text: 'Demand Forecast (History vs Projection)', font: { size: 14, weight: '600' }, color: '#1E293B', padding: { bottom: 10 } } 
+                        },
                         interaction: { mode: 'index', intersect: false },
-                        scales: { x: { ticks: { maxTicksLimit: 10 } } }
+                        scales: { 
+                          x: { grid: { display: false }, ticks: { maxTicksLimit: 8, color: '#64748B', font: { size: 11 } } },
+                          y: { grid: { color: '#F1F5F9' }, ticks: { color: '#64748B', font: { size: 11 } } }
+                        }
                       }} 
                       data={getDemandChartData(result.chart_data.demand_line_chart)} 
                     />
@@ -235,20 +261,27 @@ function App() {
                 </div>
 
                 {/* --- Chart 2: Bar Chart (Genres) --- */}
-                <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                  <div style={{ marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px dashed #ccc' }}>
-                    <h4 style={{ margin: '0 0 10px 0', color: '#440154' }}>Portfolio Mix Strategy</h4>
-                    <ul style={{ margin: 0, paddingLeft: '20px', color: '#555', fontSize: '14px' }}>
+                <div style={{ border: '1px solid #E2E8F0', padding: '24px', borderRadius: '12px', background: '#FFFFFF', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                  <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #F1F5F9' }}>
+                    <h4 style={{ margin: '0 0 8px 0', color: '#311042', fontSize: '16px', fontWeight: '700' }}>Portfolio Mix Strategy</h4>
+                    <ul style={{ margin: 0, paddingLeft: '20px', color: '#475569', fontSize: '14px', lineHeight: '1.5' }}>
                        <li><strong>Insight:</strong> Izakaya/Cafes drive volume.</li>
                        <li><strong>Strategy:</strong> Focus base marketing on volume drivers.</li>
                     </ul>
                   </div>
 
-                  <div style={{ height: '350px', position: 'relative' }}>
+                  <div style={{ height: '320px', position: 'relative' }}>
                     <Bar 
                       options={{
                         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false }, title: { display: true, text: 'Top Genres by Volume' } },
+                        plugins: { 
+                          legend: { display: false }, 
+                          title: { display: true, text: 'Top Genres by Volume', font: { size: 14, weight: '600' }, color: '#1E293B', padding: { bottom: 10 } } 
+                        },
+                        scales: {
+                          x: { grid: { color: '#F1F5F9' }, ticks: { color: '#64748B', font: { size: 11 } } },
+                          y: { grid: { display: false }, ticks: { color: '#1E293B', font: { size: 12, weight: '500' } } }
+                        }
                       }} 
                       data={getGenreChartData(result.chart_data.genre_bar_chart)} 
                     />
@@ -257,17 +290,17 @@ function App() {
               </div>
 
               {/* --- DOWNLOAD BUTTON & TECHNICAL NOTE --- */}
-              <div style={{ marginTop: '40px', textAlign: 'center' }}>
+              <div style={{ marginTop: '48px', textAlign: 'center' }}>
                 
                 {/* Technical Note */}
-                <p style={{ fontSize: '12px', color: '#666', marginBottom: '12px', maxWidth: '700px', margin: '0 auto 15px auto', lineHeight: '1.5' }}>
+                <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '16px', maxWidth: '700px', margin: '0 auto 20px auto', lineHeight: '1.5' }}>
                   Forecasted using LightGBM with 5-Fold cross-validation and stacking, utilizing temporal proximity weighing to prioritize recent signals.
                   {' '}
                   <a 
                     href="https://arxiv.org/pdf/2305.17094" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    style={{ color: '#0066cc', textDecoration: 'none' }}
+                    style={{ color: '#4F46E5', textDecoration: 'none', fontWeight: '500' }}
                   >
                     Read More
                   </a>
@@ -280,15 +313,16 @@ function App() {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    backgroundColor: '#d32f2f',
+                    backgroundColor: '#EF4444',
                     color: 'white',
-                    padding: '12px 24px',
+                    padding: '14px 28px',
                     textDecoration: 'none',
-                    borderRadius: '4px',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-                    display: 'inline-block'
+                    borderRadius: '6px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2)',
+                    display: 'inline-block',
+                    transition: 'opacity 0.2s'
                   }}
                 >
                   Download Full PDF Strategy Deck
@@ -298,16 +332,15 @@ function App() {
           )}
 
           {/* 2. RENDER RAW TABLES */}
-          <details>
-            <summary style={{cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', margin: '20px 0' }}>View Raw Data Tables</summary>
+          <details style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+            <summary style={{cursor: 'pointer', fontSize: '16px', fontWeight: '600', color: '#1E293B' }}>View Raw Data Tables</summary>
             
-            {/* Added Link to Data Source */}
-            <div style={{ margin: '15px 0 20px 5px' }}>
+            <div style={{ margin: '15px 0 15px 5px' }}>
               <a 
                 href="https://tinyurl.com/retailboostdata"
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{ fontSize: '13px', color: '#0066cc', textDecoration: 'none', fontWeight: '500' }}
+                style={{ fontSize: '13px', color: '#4F46E5', textDecoration: 'none', fontWeight: '500' }}
               >
                 🔗 Data Source
               </a>
@@ -316,20 +349,20 @@ function App() {
             {Object.keys(result).map((tableName) => {
               if (tableName === 'chart_data') return null; 
               return (
-                <div key={tableName} style={{ marginBottom: '30px', border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-                  <h4 style={{ marginTop: 0 }}>Table: {tableName}</h4>
+                <div key={tableName} style={{ marginTop: '20px', border: '1px solid #E2E8F0', padding: '16px', borderRadius: '8px', background: '#FAFAFA' }}>
+                  <h4 style={{ marginTop: 0, fontSize: '14px', color: '#475569' }}>Table: {tableName}</h4>
                   {result[tableName].error ? (
-                    <p style={{ color: 'red' }}>Error: {result[tableName].error}</p>
+                    <p style={{ color: '#EF4444' }}>Error: {result[tableName].error}</p>
                   ) : (
-                    <div style={{ maxHeight: '200px', overflow: 'auto', background: '#f9f9f9' }}>
+                    <div style={{ maxHeight: '200px', overflow: 'auto', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px' }}>
                       {result[tableName].length > 0 && (
-                        <table border="1" cellPadding="5" style={{ borderCollapse: 'collapse', width: '100%', fontSize: '12px' }}>
-                          <thead>
-                            <tr>{Object.keys(result[tableName][0]).map(k => <th key={k} style={{ textAlign: 'left' }}>{k}</th>)}</tr>
+                        <table cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%', fontSize: '12px', color: '#334155' }}>
+                          <thead style={{ background: '#F8FAFC', position: 'sticky', top: 0, boxShadow: 'inset 0 -1px 0 #E2E8F0' }}>
+                            <tr>{Object.keys(result[tableName]).map(k => <th key={k} style={{ textAlign: 'left', fontWeight: '600' }}>{k}</th>)}</tr>
                           </thead>
                           <tbody>
                             {result[tableName].slice(0, 50).map((row, idx) => (
-                              <tr key={idx}>{Object.values(row).map((val, i) => <td key={i}>{String(val)}</td>)}</tr>
+                              <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9' }}>{Object.values(row).map((val, i) => <td key={i}>{String(val)}</td>)}</tr>
                             ))}
                           </tbody>
                         </table>
@@ -343,35 +376,36 @@ function App() {
         </div>
       )}
 
-      {error && <p className="error-message" style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
+      {error && <p className="error-message" style={{ color: '#EF4444', fontWeight: 'bold', marginTop: '16px' }}>{error}</p>}
 
       {/* --- BACK TO TOP & FOOTER --- */}
-      <div style={{ marginTop: '50px', textAlign: 'center' }}>
+      <div style={{ marginTop: '64px', textAlign: 'center' }}>
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           style={{
             background: 'none',
             border: 'none',
-            color: '#0000FF',
-            textDecoration: 'underline',
+            color: '#4F46E5',
+            textDecoration: 'none',
+            fontWeight: '500',
             cursor: 'pointer',
             fontSize: '14px',
-            marginBottom: '20px'
+            marginBottom: '24px'
           }}
         >
           ↑ Back to Top / トップへ戻る
         </button>
 
         <footer style={{ 
-          padding: '20px 0', 
-          borderTop: '1px solid #ddd', 
+          padding: '24px 0', 
+          borderTop: '1px solid #E2E8F0', 
           textAlign: 'center', 
-          color: '#777',
-          fontSize: '14px',
+          color: '#64748B',
+          fontSize: '13px',
           lineHeight: '1.6'
         }}>
           <p>&copy; {new Date().getFullYear()} Gino Baltazar & Uly Lalunio of RetailBoost Forecasts. All rights reserved.</p>
-          <p style={{ margin: '5px 0', fontSize: '12px' }}>
+          <p style={{ margin: '4px 0', fontSize: '11px', color: '#94A3B8' }}>
             RetailBoost 著作権所有 &copy; {new Date().getFullYear()} 全ての権利を保有しています。
           </p>
         </footer>
