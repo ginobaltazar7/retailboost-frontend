@@ -89,8 +89,7 @@ function App() {
         }
 
         clearInterval(interval);
-        result_payload = data.result;
-        setResult(result_payload);
+        setResult(data);
         setLoading(false);
         setProgress(null);
 
