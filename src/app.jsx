@@ -70,36 +70,40 @@ function App() {
     }
   };
 
-  const pollResults = (taskId) => {
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/results/${taskId}`);
-        const data = await res.json();
-
-        if (res.status === 202) {
-          if (data.progress) setProgress(data.progress);
-          return; 
-        }
-
-        if (res.status === 404 || res.status === 500) {
-          setError('Task failed or not found.');
-          clearInterval(interval);
-          setLoading(false);
-          return;
-        }
-
+const pollResults = (taskId) => {
+  let consecutiveFailures = 0;
+  const MAX_FAILURES = 3;
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/results/${taskId}`);
+      const data = await res.json();
+      consecutiveFailures = 0; // a success resets the count
+      if (res.status === 202) {
+        if (data.progress) setProgress(data.progress);
+        return;
+      }
+      if (res.status === 404 || res.status === 500) {
+        setError('Task failed or not found.');
         clearInterval(interval);
-        setResult(data);
         setLoading(false);
-        setProgress(null);
-
-      } catch (err) {
+        return;
+      }
+      clearInterval(interval);
+      setResult(data.result ?? data);
+      setLoading(false);
+      setProgress(null);
+    } catch (err) {
+      consecutiveFailures += 1;
+      if (consecutiveFailures >= MAX_FAILURES) {
         clearInterval(interval);
         setError('Error fetching results.');
         setLoading(false);
       }
-    }, 2000);
-  };
+      // otherwise: transient blip, keep polling
+    }
+  }, 2000);
+};
+
 
   // --- RESTYLED CONFIGURATIONS FOR CHART.JS ---
   const sophisticatedPalette = [
@@ -196,10 +200,10 @@ function App() {
           <div style={{ marginBottom: '20px', fontSize: '14px', color: '#475569', lineHeight: '1.6', textAlign: 'left', borderLeft: '4px solid #EF4444', paddingLeft: '16px' }}>
             <p style={{ fontWeight: '700', margin: '0 0 6px 0', color: '#1E293B' }}>About this Analysis / 本分析について:</p>
             <p style={{ margin: '0 0 10px 0' }}>
-              RetailBoost POC is a suite of AI tools being developed to predict demand and promote sales of artisan products in local "shotengai" family-run and mid-size shops in major Osaka Japan (e.g. Tenjinbashi-suji, Shinsaibashi, Amagasaki).
+              RetailBoost Forecast Demo is a suite of AI tools being developed to predict demand and promote sales of artisan products in local "shotengai" family-run and mid-size shops in major Osaka Japan (e.g. Tenjinbashi-suji, Shinsaibashi, Amagasaki).
             </p>
             <p style={{ margin: 0, fontStyle: 'italic', fontSize: '13px', color: '#64748B' }}>
-              RetailBoost POCは、大阪の主要な商店街（天神橋筋、心斎橋、尼崎など）における家族経営や中規模店舗のために、需要予測、販売促進、プロモーション構築のための商品提案を行うAIツールスイートです。
+              RetailBoost Forecast Demo は、大阪の主要な商店街（天神橋筋、心斎橋、尼崎など）における家族経営や中規模店舗のために、需要予測、販売促進、プロモーション構築のための商品提案を行うAIツールスイートです。
             </p>
           </div>
 
@@ -354,7 +358,7 @@ function App() {
                     <p style={{ color: '#EF4444' }}>Error: {result[tableName].error}</p>
                   ) : (
                     <div style={{ maxHeight: '200px', overflow: 'auto', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px' }}>
-                      {result[tableName].length > 0 && (
+                      {Array.isArray(result[tableName]) && result[tableName].length > 0 && (
                         <table cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%', fontSize: '12px', color: '#334155' }}>
                           <thead style={{ background: '#F8FAFC', position: 'sticky', top: 0, boxShadow: 'inset 0 -1px 0 #E2E8F0' }}>
                             <tr>{Object.keys(result[tableName]).map(k => <th key={k} style={{ textAlign: 'left', fontWeight: '600' }}>{k}</th>)}</tr>
